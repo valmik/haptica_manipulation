@@ -116,7 +116,7 @@ if __name__ == '__main__':
     # if len(sys.argv) > 1:
     #     filename = sys.argv[1]
 
-    joints1 = [0, 0, 0, 0, 0, 0]
+    joints1 = [4.80, 2.92, 1.00, 4.20, 1.45, 1.32]
     joints2 = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
 
 
@@ -127,6 +127,9 @@ if __name__ == '__main__':
     rospy.sleep(2)
 
     kinova_controller = KinovaController()
+
+    print kinova_controller.group.get_current_joint_values()
+    print robot.get_current_state()
 
     while True:
         raw_input("Press Enter to move to position 1")

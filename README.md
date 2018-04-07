@@ -54,7 +54,7 @@ This is calling the JointModel, which is inside moveit_core::robot_model. The ac
         return true;
     }
 
-
+Margin =  is What's happening is that 
 
 
 

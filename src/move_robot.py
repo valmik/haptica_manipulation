@@ -127,9 +127,16 @@ if __name__ == '__main__':
 
     kinova_controller = KinovaController()
 
-    plan = kinova_controller.collision_free_move(joints1)
+    while True:
+        raw_input("Press Enter to move to position 1")
+        plan = kinova_controller.collision_free_move(joints1)
+        kinova_controller.group.execute(plan, wait=True)
+        rospy.sleep(0.5)
 
-
+        raw_input("Press Enter to move to position 2")
+        plan = kinova_controller.collision_free_move(joints2)
+        kinova_controller.group.execute(plan, wait=True)
+        rospy.sleep(0.5)
 
 
 

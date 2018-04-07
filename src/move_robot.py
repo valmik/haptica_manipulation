@@ -62,6 +62,22 @@ class KinovaController(object):
 
         return plan
 
+    def collision_free_move_pose(self, end_pose):
+        """
+        Uses MoveIt to plan a path from the current state to end effector pose end_pose
+        end_pose: a PoseStamped object for the end effector
+        """
+
+        self.group.set_start_state_to_current_state()
+        self.group.set_joint_value_target(end_pose)
+
+        self.group.set_workspace([-3, -3, -3, 3, 3, 3])
+
+        plan = self.group.plan()
+
+        return plan
+
+
     def visualize_plan(self, plan):
         """
         Visualize the plan in RViz
@@ -75,8 +91,8 @@ class KinovaController(object):
 def make_pose(position, orientation, frame):
     """
     Creates a PoseStamped message based on provided position and orientation
-    position: numpy array of size 3
-    orientation: numpy array of size 4 (quaternion)
+    position: list of size 3
+    orientation: list of size 4 (quaternion)
     frame: string (the reference frame to which the pose is defined)
     """
 
@@ -138,16 +154,23 @@ if __name__ == '__main__':
     print kinova_controller.group.get_current_joint_values()
     print robot.get_current_state()
 
-    while True:
-        raw_input("Press Enter to move to position 1")
-        plan = kinova_controller.collision_free_move(joints1)
-        kinova_controller.group.execute(plan, wait=True)
-        rospy.sleep(0.5)
+    pose = make_pose([0.25, 0.25, 0.25], [1, 0, 0, 0], robot.get_planning_frame())
 
-        raw_input("Press Enter to move to position 2")
-        plan = kinova_controller.collision_free_move(joints2)
-        kinova_controller.group.execute(plan, wait=True)
-        rospy.sleep(0.5)
+    raw_input("Press Enter to move to position 1")
+    plan = kinova_controller.collision_free_move_pose(pose)
+    kinova_controller.group.execute(plan, wait=True)
+    rospy.sleep(0.5)
+
+    # while True:
+    #     raw_input("Press Enter to move to position 1")
+    #     plan = kinova_controller.collision_free_move(joints1)
+    #     kinova_controller.group.execute(plan, wait=True)
+    #     rospy.sleep(0.5)
+
+    #     raw_input("Press Enter to move to position 2")
+    #     plan = kinova_controller.collision_free_move(joints2)
+    #     kinova_controller.group.execute(plan, wait=True)
+    #     rospy.sleep(0.5)
 
 
 

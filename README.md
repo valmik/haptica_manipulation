@@ -19,3 +19,45 @@ rosrun haptica_manipulation move_robot.py
 [//]: # "catkin_create_pkg haptica_manipulation pluginlib moveit_core moveit_ros_planning_interface moveit_ros_perception interactive_markers cmake_modules geometric_shapes kinova_driver moveit_fake_controller_manager std_msgs moveit_msgs geometry_msgs shape_msgs"
 
 
+# Valmik's Note: Please Ignore
+
+MoveGroupCommander.set_joint_value_target doesn't work for a list of joint values or a JointState message. Bounds error
+
+the python function is a wrapper for this:
+
+    bool moveit::planning_interface::MoveGroupInterface::setJointValueTarget(const sensor_msgs::JointState& state)
+    {
+      impl_->setTargetType(JOINT);
+      impl_->getJointStateTarget().setVariableValues(state);
+      return impl_->getJointStateTarget().satisfiesBounds(impl_->getGoalJointTolerance());
+    }
+
+impl_ is a MoveGroupInterfaceIMPL. getJointStateTarget returns a RobotState object, and getGoalJointTolerance returns a double
+
+The RobotState function is (in header file not actual):
+
+    bool satisfiesBounds(const JointModel* joint, double margin = 0.0) const
+    {
+    return satisfiesPositionBounds(joint, margin) && (!has_velocity_ || satisfiesVelocityBounds(joint, margin));
+    }
+    bool satisfiesPositionBounds(const JointModel* joint, double margin = 0.0) const
+    {
+    return joint->satisfiesPositionBounds(getJointPositions(joint), margin);
+    }
+
+This is calling the JointModel, which is inside moveit_core::robot_model. The actual model seems to be a revolute joint: Here's the function
+
+bool RevoluteJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
+{
+  if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
+    return false;
+  return true;
+}
+
+
+
+
+
+
+
+

@@ -33,7 +33,7 @@ class PathPlanner(object):
         self.display_planned_path_publisher = rospy.Publisher('arm/display_planned_path', DisplayTrajectory, queue_size=10)
 
         # This publishes updates to the planning scene
-        self.planning_scene_publisher = rospy.Publisher('/collision_object', CollisionObject)
+        self.planning_scene_publisher = rospy.Publisher('/collision_object', CollisionObject, queue_size=10)
 
         # Planning scene
         self.scene = moveit_commander.PlanningSceneInterface()

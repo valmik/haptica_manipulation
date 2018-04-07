@@ -7,7 +7,7 @@ roslaunch kinova_gazebo robot_launch.launch kinova_robotType:=m1n6s300
 
 roslaunch m1n6s300_moveit_config m1n6s300_gazebo_demo.launch
 
-rosrun haptica_manipulation move_robot.py
+rosrun haptica_manipulation path_planner.py
 
 
 
@@ -54,7 +54,7 @@ This is calling the JointModel, which is inside moveit_core::robot_model. The ac
         return true;
     }
 
-Margin =  is What's happening is that 
+Margin = GoalJointTolerance is instantiated at like 10^-4, so it's not a problem. What's happening is that the bounds are failing when they shouldn't. There's no error in the C++ implementation, so they don't realize / it doesn't matter, but with Python it throws an exception. Just catch it and it'll be fine.
 
 
 

@@ -5,6 +5,7 @@ import moveit_commander
 from moveit_msgs.msg import DisplayTrajectory, RobotState, PlanningScene, CollisionObject
 from geometry_msgs.msg import PoseStamped
 from shape_msgs.msg import SolidPrimitive
+from sensor_msgs.msg import JointState
 
 import tf
 

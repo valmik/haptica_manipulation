@@ -56,7 +56,7 @@ class KinovaController(object):
 
         try:
             self.group.set_joint_value_target(joint_state)
-        except MoveItCommanderException:
+        except moveit_commander.MoveItCommanderException:
             pass
 
         self.group.set_workspace([-3, -3, -3, 3, 3, 3])

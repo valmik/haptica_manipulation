@@ -47,12 +47,12 @@ The RobotState function is (in header file not actual):
 
 This is calling the JointModel, which is inside moveit_core::robot_model. The actual model seems to be a revolute joint: Here's the function
 
-bool RevoluteJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
-{
-  if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
-    return false;
-  return true;
-}
+    bool RevoluteJointModel::satisfiesPositionBounds(const double* values, const Bounds& bounds, double margin) const
+    {
+        if (values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin)
+            return false;
+        return true;
+    }
 
 
 

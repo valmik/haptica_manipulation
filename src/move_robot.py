@@ -47,7 +47,8 @@ class KinovaController(object):
 
         joint_state = JointState()
         joint_state.header.stamp = rospy.Time.now()
-        joint_state.name = self.group.get_joints()[:-1]
+        # the robot has a dumb base_link joint that we don't want
+        joint_state.name = self.group.get_joints()[1:-1]
         print joint_state.name
         joint_state.position = end_state
 

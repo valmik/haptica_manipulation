@@ -75,14 +75,14 @@ class PathPlanner(object):
 
         return plan
 
-    def execute_path(path, wait_bool = True):
+    def execute_path(path, wait = True):
         """
         Executes a provided path.
         Note that the current position must be the same as the path's initial position.
         This is currently not checked.
         """
 
-        self.group.execute(path, wait=wait_bool)
+        self.group.execute(path, wait=wait)
 
     # def collision_free_move_pose(self, end_pose):
     #     """

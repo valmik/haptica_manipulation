@@ -75,14 +75,14 @@ class PathPlanner(object):
 
         return plan
 
-    def execute_path(path, wait = True):
+    def execute_path(path, wait_bool = True):
         """
         Executes a provided path.
         Note that the current position must be the same as the path's initial position.
         This is currently not checked.
         """
 
-        self.group.execute(path, wait=wait)
+        self.group.execute(path, wait=wait_bool)
 
     # def collision_free_move_pose(self, end_pose):
     #     """
@@ -183,18 +183,18 @@ if __name__ == '__main__':
 
     raw_input("Press Enter to move to home")
     plan = path_planner.move_home()
-    path_planner.execute_path(plan, wait=True)
+    path_planner.execute_path(plan)
     rospy.sleep(0.5)
 
     while True:
         raw_input("Press Enter to move to position 1")
         plan = path_planner.plan_to_config(joints1)
-        path_planner.execute_path(plan, wait=True)
+        path_planner.execute_path(plan)
         rospy.sleep(0.5)
 
         raw_input("Press Enter to move to position 2")
         plan = path_planner.plan_to_config(joints2)
-        path_planner.execute_path(plan, wait=True)
+        path_planner.execute_path(plan)
         rospy.sleep(0.5)
 
 

@@ -45,8 +45,14 @@ class KinovaController(object):
         end_state: list of joint values
         """
 
+        joint_state = JointState()
+        joint_state.header.stamp = rospy.Time.now()
+        joint_state.name = self.group.get_joints()[:-1]
+        print joint_state.name
+        joint_state.position = end_state
+
         self.group.set_start_state_to_current_state()
-        self.group.set_joint_value_target(end_state)
+        self.group.set_joint_value_target(joint_state)
 
         self.group.set_workspace([-3, -3, -3, 3, 3, 3])
         

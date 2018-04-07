@@ -10,13 +10,17 @@ project(haptica_manipulation)
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometric_shapes
+  geometry_msgs
   interactive_markers
   kinova_driver
   moveit_core
   moveit_fake_controller_manager
+  moveit_msgs
   moveit_ros_perception
   moveit_ros_planning_interface
   pluginlib
+  shape_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions

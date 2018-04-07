@@ -77,6 +77,21 @@ class KinovaController(object):
 
         return plan
 
+    def move_home(self):
+        """
+        Uses MoveIt to plan a path from the current state to the home position
+        """
+
+        self.group.set_start_state_to_current_state()
+        self.group.set_named_target('Home')
+
+        self.group.set_workspace([-3, -3, -3, 3, 3, 3])
+
+        plan = self.group.plan()
+
+        return plan
+
+
 
     def visualize_plan(self, plan):
         """
@@ -156,10 +171,15 @@ if __name__ == '__main__':
 
     pose = make_pose([0.25, 0.25, 0.25], [1, 0, 0, 0], robot.get_planning_frame())
 
-    raw_input("Press Enter to move to position 1")
-    plan = kinova_controller.collision_free_move_pose(pose)
+    raw_input("Press Enter to move to position")
+    plan = kinova_controller.move_home()
     kinova_controller.group.execute(plan, wait=True)
     rospy.sleep(0.5)
+
+    # raw_input("Press Enter to move to position 1")
+    # plan = kinova_controller.collision_free_move_pose(pose)
+    # kinova_controller.group.execute(plan, wait=True)
+    # rospy.sleep(0.5)
 
     # while True:
     #     raw_input("Press Enter to move to position 1")

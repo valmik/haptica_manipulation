@@ -75,7 +75,7 @@ class PathPlanner(object):
 
         return plan
 
-    def execute_path(path, wait_bool = True):
+    def execute_path(self, path, wait_bool = True):
         """
         Executes a provided path.
         Note that the current position must be the same as the path's initial position.

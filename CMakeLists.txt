@@ -10,13 +10,17 @@ project(haptica_manipulation)
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometric_shapes
+  geometry_msgs
   interactive_markers
   kinova_driver
   moveit_core
   moveit_fake_controller_manager
+  moveit_msgs
   moveit_ros_perception
   moveit_ros_planning_interface
   pluginlib
+  shape_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -76,7 +80,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   geometry_msgs#   moveit_msgs#   shape_msgs#   std_msgs
 # )
 
 ################################################
@@ -111,7 +115,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES haptica_manipulation
-#  CATKIN_DEPENDS cmake_modules geometric_shapes interactive_markers kinova_driver moveit_core moveit_fake_controller_manager moveit_ros_perception moveit_ros_planning_interface pluginlib
+#  CATKIN_DEPENDS cmake_modules geometric_shapes geometry_msgs interactive_markers kinova_driver moveit_core moveit_fake_controller_manager moveit_msgs moveit_ros_perception moveit_ros_planning_interface pluginlib shape_msgs std_msgs
 #  DEPENDS system_lib
 )
 

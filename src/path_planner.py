@@ -210,7 +210,7 @@ class PathPlanner(object):
 
         links = [self.ik_solver.tip_link]
 
-        return self.compute_fk(header, links, robot_state)
+        return self.fk_solver(header, links, robot_state)
 
 def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robot, operation):
     """

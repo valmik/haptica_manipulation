@@ -7,6 +7,8 @@ from geometry_msgs.msg import PoseStamped
 from shape_msgs.msg import SolidPrimitive
 from sensor_msgs.msg import JointState
 from trac_ik_python.trac_ik import IK
+from moveit_msgs.srv import GetPositionFK
+from std_msgs.msg import Header
 
 import sys
 import numpy as np
@@ -21,6 +23,7 @@ class PathPlanner(object):
         dynamicreplanning.weebly.com,
         moveit python interface tutorial,
         trac_ik python tutorial
+        jaco_manipulation
         """
         rospy.loginfo("To stop project CTRL + C")
         rospy.on_shutdown(self.shutdown)
@@ -45,11 +48,14 @@ class PathPlanner(object):
         # RobotCommander
         self.robot = moveit_commander.RobotCommander()
 
-        # IK Solver
+        # IK Solver with trac_ik
         # NOTE: Get this from the MoveGroup so it's adaptable to other robots
         self.ik_solver = IK('root', 'm1n6s300_end_effector')
         self.ik_default_seed = [0.0] * self.ik_solver.number_of_joints
         
+        # FK Solver
+        rospy.wait_for_service('/compute_fk')
+        self.fk_solver = rospy.ServiceProxy('/compute_fk', GetPositionFK)
 
         rospy.sleep(2)        
 
@@ -93,20 +99,20 @@ class PathPlanner(object):
 
         self.group.execute(path, wait=wait_bool)
 
-    # def collision_free_move_pose(self, end_pose):
-    #     """
-    #     Uses MoveIt to plan a path from the current state to end effector pose end_pose
-    #     end_pose: a PoseStamped object for the end effector
-    #     """
+        # def collision_free_move_pose(self, end_pose):
+        #     """
+        #     Uses MoveIt to plan a path from the current state to end effector pose end_pose
+        #     end_pose: a PoseStamped object for the end effector
+        #     """
 
-    #     self.group.set_start_state_to_current_state()
-    #     self.group.set_joint_value_target(end_pose)
+        #     self.group.set_start_state_to_current_state()
+        #     self.group.set_joint_value_target(end_pose)
 
-    #     self.group.set_workspace([-3, -3, -3, 3, 3, 3])
+        #     self.group.set_workspace([-3, -3, -3, 3, 3, 3])
 
-    #     plan = self.group.plan()
+        #     plan = self.group.plan()
 
-    #     return plan
+        #     return plan
 
     def move_home(self):
         """
@@ -121,8 +127,6 @@ class PathPlanner(object):
         plan = self.group.plan()
 
         return plan
-
-
 
     def visualize_plan(self, plan):
         """
@@ -190,6 +194,23 @@ class PathPlanner(object):
 
         return state
 
+    def get_fk(self, joints):
+        """
+        Gets forward kinematics to the end effector
+        joints: size 6 list. Joint angles for desired pose
+        returns pose: StackedPose of the end effector in the 'root' frame
+        """
+
+        header = Header()
+        header.frame_id = self.ik_solver.base_link
+
+        robot_state = RobotState()
+        robot_state.joint_state.name = self.ik_solver.joint_names
+        robot_state.joint_state.position = joints
+
+        links = [self.ik_solver.tip_link]
+
+        return self.compute_fk(header, links, robot_state)
 
 def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robot, operation):
     """
@@ -214,8 +235,6 @@ def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robo
     co.primitives = [box]
     co.primitive_poses = [pose.pose]
     planning_scene_publisher.publish(co)
-
-
 
 def test_planning():
     """
@@ -251,7 +270,7 @@ def test_ik():
 
     path_planner = PathPlanner()
 
-    position = [0.25, 0.25, 0.1]
+    position = [0.25, 0.25, 0.3]
     orientation = [1.0, 0.0, 0.0, 0.0]
     frame = 'root'
 
@@ -271,6 +290,20 @@ def test_ik():
     path_planner.execute_path(plan)
     rospy.sleep(0.5)
 
+def test_fk():
+    """
+    Tests that you can get a pose from a known valid configuration
+    """
+
+    joints = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
+
+    path_planner = PathPlanner()
+
+    pose = path_planner.get_fk(joints)
+
+    print pose
+
+
 
 if __name__ == '__main__':
     rospy.init_node('kinova_controller')
@@ -278,7 +311,7 @@ if __name__ == '__main__':
     # if len(sys.argv) > 1:
     #     filename = sys.argv[1]
 
-    test_ik()
+    test_fk()
 
 
 

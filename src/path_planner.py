@@ -48,7 +48,7 @@ class PathPlanner(object):
         # IK Solver
         # NOTE: Get this from the MoveGroup so it's adaptable to other robots
         self.ik_solver = IK('root', 'm1n6s300_end_effector')
-        self.ik_default_seed = [0.0] * ik_solver.number_of_joints
+        self.ik_default_seed = [0.0] * self.ik_solver.number_of_joints
         
 
         rospy.sleep(2)        

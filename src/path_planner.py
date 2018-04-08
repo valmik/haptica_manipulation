@@ -170,10 +170,19 @@ class PathPlanner(object):
         if pose.header.frame_id != self.ik_solver.base_link:
             raise ValueError("Frame ID is not the root link")
 
+        position = pose.pose.position
+        orientation = pose.pose.orientation
+
         if xyz_bounds is None or rpy_bounds is None:
-            state = self.ik_solver.get_ik(seed_state, pose.pose.position, pose.pose.orientation)
+            state = self.ik_solver.get_ik(seed_state, position.x, 
+                position.y, position.z, orientation.x, orientation.y, 
+                orientation.z, orientation.w)
         else:
-            state = self.ik_solver.get_ik(seed_state, pose.pose.position, pose.pose.orientation, xyz_bounds, rpy_bounds)
+            state = self.ik_solver.get_ik(seed_state, position.x, 
+                position.y, position.z, orientation.x, orientation.y, 
+                orientation.z, orientation.w, xyz_bounds[0], 
+                xyz_bounds[1], xyz_bounds[2], rpy_bounds[0], 
+                rpy_bounds[1], rpy_bounds[2])
 
         return state
 

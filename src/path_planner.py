@@ -173,9 +173,9 @@ class PathPlanner(object):
         position = pose.pose.position
         orientation = pose.pose.orientation
 
-        print seed_state, position.x, position.y, 
-            position.z, orientation.x, orientation.y, 
-            orientation.z, orientation.w
+        print seed_state, position.x, position.y, \
+            position.z, orientation.x, orientation.y, \
+            orientation.z, orientation.w \
 
         if xyz_bounds is None or rpy_bounds is None:
             state = self.ik_solver.get_ik(seed_state, position.x, 

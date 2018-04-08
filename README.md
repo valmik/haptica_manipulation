@@ -10,16 +10,26 @@ roslaunch m1n6s300_moveit_config m1n6s300_gazebo_demo.launch
 rosrun haptica_manipulation path_planner.py
 
 
+# Issues:
+- Update IK solver links to come from the move group rather than being manually entered
+- Make an IK-based planner
+    - collision checks on IK
+    - check multiple IK solutions
+- Add a second move group for the gripper
 
 
 
 
+# Valmik's Notes Below: Please Ignore
 
 
-[//]: # "catkin_create_pkg haptica_manipulation pluginlib moveit_core moveit_ros_planning_interface moveit_ros_perception interactive_markers cmake_modules geometric_shapes kinova_driver moveit_fake_controller_manager std_msgs moveit_msgs geometry_msgs shape_msgs"
+# Create Package
+- need to update with: sensor_msgs, trac_ik
+
+catkin_create_pkg haptica_manipulation pluginlib moveit_core moveit_ros_planning_interface moveit_ros_perception interactive_markers cmake_modules geometric_shapes kinova_driver moveit_fake_controller_manager std_msgs moveit_msgs geometry_msgs shape_msgs
 
 
-# Valmik's Note: Please Ignore
+# set_joint_value_target Issue
 
 MoveGroupCommander.set_joint_value_target doesn't work for a list of joint values or a JointState message. Bounds error
 

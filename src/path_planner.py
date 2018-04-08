@@ -6,6 +6,7 @@ from moveit_msgs.msg import DisplayTrajectory, RobotState, PlanningScene, Collis
 from geometry_msgs.msg import PoseStamped
 from shape_msgs.msg import SolidPrimitive
 from sensor_msgs.msg import JointState
+from trac_ik_python.trac_ik import IK
 
 import sys
 import numpy as np
@@ -16,7 +17,10 @@ class PathPlanner(object):
     def __init__(self):
         """
         Path Planner Class.
-        Referenced dynamicreplanning.weebly.com and moveit python interface tutorial
+        References:
+        dynamicreplanning.weebly.com,
+        moveit python interface tutorial,
+        trac_ik python tutorial
         """
         rospy.loginfo("To stop project CTRL + C")
         rospy.on_shutdown(self.shutdown)
@@ -40,6 +44,11 @@ class PathPlanner(object):
         
         # RobotCommander
         self.robot = moveit_commander.RobotCommander()
+
+        # IK Solver
+        # NOTE: Get this from the MoveGroup so it's adaptable to other robots
+        self.ik_solver = IK('root', 'm1n6s300_end_effector')
+        self.ik_default_seed = [0.0] * ik_solver.number_of_joints
         
 
         rospy.sleep(2)        
@@ -125,24 +134,45 @@ class PathPlanner(object):
         display_trajectory.trajectory.extend(plan.points)
         self.display_planned_path_publisher.publish(display_trajectory)
 
-def make_pose(position, orientation, frame):
-    """
-    Creates a PoseStamped message based on provided position and orientation
-    position: list of size 3
-    orientation: list of size 4 (quaternion)
-    frame: string (the reference frame to which the pose is defined)
-    """
+    def make_pose(position, orientation, frame):
+        """
+        Creates a PoseStamped message based on provided position and orientation
+        position: list of size 3
+        orientation: list of size 4 (quaternion)
+        frame: string (the reference frame to which the pose is defined)
+        returns pose: a PoseStamped object
+        """
 
-    pose = PoseStamped()
-    pose.header.frame_id = frame
-    pose.pose.position.x = position[0]
-    pose.pose.position.y = position[1]
-    pose.pose.position.z = position[2]
-    pose.pose.orientation.w = orientation[0]
-    pose.pose.orientation.x = orientation[1]
-    pose.pose.orientation.y = orientation[2]
-    pose.pose.orientation.z = orientation[3]
-    return pose
+        pose = PoseStamped()
+        pose.header.frame_id = frame
+        pose.pose.position.x = position[0]
+        pose.pose.position.y = position[1]
+        pose.pose.position.z = position[2]
+        pose.pose.orientation.w = orientation[0]
+        pose.pose.orientation.x = orientation[1]
+        pose.pose.orientation.y = orientation[2]
+        pose.pose.orientation.z = orientation[3]
+        return pose
+
+    def get_ik(self, pose, seed_state = self.ik_default_seed, xyz_bounds = None, rpy_bounds = None):
+        """
+        get_ik returns a joint configuration from an end effector pose by using the trac_ik solver
+        pose: PoseStamped object. The header.frame_id should be "root", or it won't work
+        xyz_bounds: a list of size 3. xyz bounds of the end effector in meters. This allows an approximate ik solution. Default is None
+        rpy_bounds: a list of size 3. roll pitch yaw bounds of the end effector in radians. This allows an approximate ik solution. Default is None 
+        returns state: a list of joint values
+        """
+
+        if pose.header.frame_id != self.ik_solver.base_link:
+            raise ValueError("Frame ID is not the root link")
+
+        if xyz_bounds is None or rpy_bounds is None:
+            state = self.ik_solver.get_ik(seed_state, pose.pose.position, pose.pose.orientation)
+        else:
+            state = self.ik_solver.get_ik(seed_state, pose.pose.position, pose.pose.orientation, xyz_bounds, rpy_bounds)
+
+        return state
+
 
 def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robot, operation):
     """
@@ -170,7 +200,7 @@ def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robo
 
 
 
-def test1():
+def test_planning():
     """
     Move back and forth between two points
     """
@@ -197,6 +227,33 @@ def test1():
         path_planner.execute_path(plan)
         rospy.sleep(0.5)
 
+def test_ik():
+    """
+    Tests the IK solver
+    """
+
+    path_planner = PathPlanner()
+
+    position = [0.25, 0.25, 0.1]
+    orientation = [1.0, 0.0, 0.0, 0.0]
+    frame = 'root'
+
+    raw_input("Press Enter to move to home")
+    plan = path_planner.move_home()
+    path_planner.execute_path(plan)
+    rospy.sleep(0.5)
+
+    raw_input("Press Enter to run inverse kinematics")
+    pose = path_planner.make_pose(position, orientation, frame)
+    joints = path_planner.get_ik()
+
+    print joints
+
+    raw_input("Press Enter to move to position")
+    plan = path_planner.plan_to_config(joints)
+    path_planner.execute_path(plan)
+    rospy.sleep(0.5)
+
 
 if __name__ == '__main__':
     rospy.init_node('kinova_controller')
@@ -204,7 +261,7 @@ if __name__ == '__main__':
     # if len(sys.argv) > 1:
     #     filename = sys.argv[1]
 
-    test1()
+    testik()
 
 
 

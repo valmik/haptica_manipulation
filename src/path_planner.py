@@ -134,7 +134,7 @@ class PathPlanner(object):
         display_trajectory.trajectory.extend(plan.points)
         self.display_planned_path_publisher.publish(display_trajectory)
 
-    def make_pose(position, orientation, frame):
+    def make_pose(self, position, orientation, frame):
         """
         Creates a PoseStamped message based on provided position and orientation
         position: list of size 3

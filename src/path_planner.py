@@ -154,14 +154,18 @@ class PathPlanner(object):
         pose.pose.orientation.z = orientation[3]
         return pose
 
-    def get_ik(self, pose, seed_state = self.ik_default_seed, xyz_bounds = None, rpy_bounds = None):
+    def get_ik(self, pose, seed_state = None, xyz_bounds = None, rpy_bounds = None):
         """
         get_ik returns a joint configuration from an end effector pose by using the trac_ik solver
         pose: PoseStamped object. The header.frame_id should be "root", or it won't work
+        seed_state: a list of size 6. Initial joint positions for the solver. Default is [0,0,0,0,0,0]
         xyz_bounds: a list of size 3. xyz bounds of the end effector in meters. This allows an approximate ik solution. Default is None
         rpy_bounds: a list of size 3. roll pitch yaw bounds of the end effector in radians. This allows an approximate ik solution. Default is None 
         returns state: a list of joint values
         """
+
+        if seed_state is None:
+            seed_state = self.ik_default_seed
 
         if pose.header.frame_id != self.ik_solver.base_link:
             raise ValueError("Frame ID is not the root link")

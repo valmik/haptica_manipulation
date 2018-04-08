@@ -15,6 +15,7 @@ rosrun haptica_manipulation path_planner.py
 - Make an IK-based planner
     - collision checks on IK
     - check multiple IK solutions
+    - intelligent initial conditions for kinematics
 - Add a second move group for the gripper
 
 

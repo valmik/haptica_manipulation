@@ -270,20 +270,20 @@ def test_ik():
 
     path_planner = PathPlanner()
 
-    position = [0.25, 0.25, 0.3]
-    orientation = [1.0, 0.0, 0.0, 0.0]
-    frame = 'root'
-
     raw_input("Press Enter to move to home")
     plan = path_planner.move_home()
     path_planner.execute_path(plan)
     rospy.sleep(0.5)
 
+    joints_old = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
+    pose = path_planner.get_fk(joints)
+
     raw_input("Press Enter to run inverse kinematics")
     pose = path_planner.make_pose(position, orientation, frame)
     joints = path_planner.get_ik(pose)
 
-    print joints
+    print 'input:' + str(joints_old)
+    print 'solution:' + str(joints)
 
     raw_input("Press Enter to move to position")
     plan = path_planner.plan_to_config(joints)
@@ -303,15 +303,13 @@ def test_fk():
 
     print pose
 
-
-
 if __name__ == '__main__':
     rospy.init_node('kinova_controller')
 
     # if len(sys.argv) > 1:
     #     filename = sys.argv[1]
 
-    test_fk()
+    test_ik()
 
 
 

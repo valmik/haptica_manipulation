@@ -138,7 +138,7 @@ class PathPlanner(object):
         """
         Creates a PoseStamped message based on provided position and orientation
         position: list of size 3
-        orientation: list of size 4 (quaternion)
+        orientation: list of size 4 (quaternion) (wxyz)
         frame: string (the reference frame to which the pose is defined)
         returns pose: a PoseStamped object
         """
@@ -172,6 +172,10 @@ class PathPlanner(object):
 
         position = pose.pose.position
         orientation = pose.pose.orientation
+
+        print seed_state, position.x, position.y, 
+            position.z, orientation.x, orientation.y, 
+            orientation.z, orientation.w
 
         if xyz_bounds is None or rpy_bounds is None:
             state = self.ik_solver.get_ik(seed_state, position.x, 

@@ -13,8 +13,6 @@ from std_msgs.msg import Header
 import sys
 import numpy as np
 
-
-
 class PathPlanner(object):
     def __init__(self):
         """

@@ -276,7 +276,7 @@ def test_ik():
     rospy.sleep(0.5)
 
     joints_old = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
-    pose = path_planner.get_fk(joints)
+    pose = path_planner.get_fk(joints_old)
 
     raw_input("Press Enter to run inverse kinematics")
     pose = path_planner.make_pose(position, orientation, frame)

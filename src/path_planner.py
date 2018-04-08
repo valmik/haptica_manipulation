@@ -192,7 +192,7 @@ class PathPlanner(object):
                 xyz_bounds[1], xyz_bounds[2], rpy_bounds[0], 
                 rpy_bounds[1], rpy_bounds[2])
 
-        return state
+        return state.pose_stamped[0]
 
     def get_fk(self, joints):
         """

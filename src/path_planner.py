@@ -279,7 +279,6 @@ def test_ik():
     pose = path_planner.get_fk(joints_old)
 
     raw_input("Press Enter to run inverse kinematics")
-    pose = path_planner.make_pose(position, orientation, frame)
     joints = path_planner.get_ik(pose)
 
     print 'input:' + str(joints_old)

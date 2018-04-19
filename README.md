@@ -10,6 +10,13 @@ roslaunch m1n6s300_moveit_config m1n6s300_gazebo_demo.launch
 rosrun haptica_manipulation path_planner.py
 
 
+# Things to do:
+- interface
+- testing / robustness
+- tuning?
+- launch files?
+
+
 # Issues:
 - Update IK solver links to come from the move group rather than being manually entered
 - Make an IK-based planner
@@ -17,6 +24,7 @@ rosrun haptica_manipulation path_planner.py
     - check multiple IK solutions
     - intelligent initial conditions for kinematics
 - Add a second move group for the gripper
+- Objects
 
 
 

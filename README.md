@@ -25,7 +25,11 @@ rosrun haptica_manipulation path_planner.py
     - intelligent initial conditions for kinematics
 - Add a second move group for the gripper
 - Objects
-
+    http://docs.ros.org/indigo/api/moveit_tutorials/html/doc/pr2_tutorials/planning/src/doc/move_group_interface_tutorial.html
+    http://docs.ros.org/hydro/api/pr2_moveit_tutorials/html/planning/src/doc/move_group_interface_tutorial.html
+    https://answers.ros.org/question/172720/problem-loading-mesh-with-createmeshfromresource/
+    http://docs.ros.org/indigo/api/moveit_msgs/html/msg/CollisionObject.html
+    https://answers.ros.org/question/204770/insert-obstacle-in-step-format-into-moveit-via-c-node/
 
 
 

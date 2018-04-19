@@ -42,10 +42,10 @@ class PathPlanner():
         """
         Plans to a pose by using inverse kinematics.
         -------
-        end_pose is a rigid_transform object from autolab? (or should I write my own? Or allow different inputs?) 
-        seed is an optional input to the IK solver.
-        It's a configuration (len 6 array) from which the solver will start. (trac_ik uses an augmented newton's method)
-        If it's none, it'll use the current pose as the seed
+        end_pose: rigid_transform object from autolab? (or should I write my own? Or allow different inputs?) 
+        seed: an optional input to the IK solver.
+            It's a configuration (len 6 array) from which the solver will start. (trac_ik uses an augmented newton's method)
+            If it's None, it'll use the current pose as the seed
         -------
         returns: moveit path object
         """
@@ -79,12 +79,12 @@ class PathPlanner():
         Plans and executes grippers opening
         """
 
-    def execute_path(self, path, waitbool = True):
+    def execute_path(self, path, wait_bool = True):
         """
         Executes an input path in the real world / gazebo / rviz
         ------
         path: a moveit path object
-        waitbool: whether the node pauses until the robot reaches its destination
+        wait_bool: whether the node pauses until the robot reaches its destination
         """
         raiseNotDefined()
 

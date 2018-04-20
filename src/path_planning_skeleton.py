@@ -1,57 +1,6 @@
 # This is a skeleton for the path planning api I'll be building
 
 
-class PlanningInterface():
-	"""
-	This is the user-facing interface containing the functions
-		the user will primarily use.
-	It will contain a PathPlanner class, which wraps MoveIt
-	"""
-
-	def __init__(self):
-		"""
-		Will probably do nothing except instantiate a PathPlanner
-		"""
-
-	def populate_scene():
-		"""
-		Not sure how this will be implemented yet, but will basically
-			use the PathPlanner planning scene functionality to add
-			the scene items needed for our test/demo
-		"""
-
-    def iterate_ik(self, pose, state_list = None, xyz_bounds = None, rpy_bounds = None, iteration_limit = 10):
-        """
-        Iterates IK until a non-colliding solution is found, or it hits the iteration limit
-        ------
-        pose: see get_ik
-        state_list: list of length 6 lists, each of which is an initial condition to be tested.
-            After the list is exhausted, the system will use pseudorandom start conditions
-            until the iteration count runs out (hopefully it'll pick random states intelligently)
-        xyz_bounds: see get_ik
-        rpy_bounds: see get_ik
-        iteration_limit: max number of initial conditions the algorithm will try (including the list)
-            Default is 10.
-        ------
-        returns: joint states, a list of size 6 (or None for failure)
-        """
-        raiseNotDefined()
-
-    def grasp_plan(self, pregrasp, grasp):
-        """
-        Plans to a pregrasp pose, then plans to the grasp pose
-        Does not open/close fingers
-        This should be the main function used, and will use many of the other functions
-        It will (hopefully) select intelligent IK solutions
-        ------
-        pregrasp: An autolab rigid_transform? see plan_to_pose
-        grasp: same as above
-        ------
-        returns: either two plans concatenated or just executes it
-        """
-        raiseNotDefined()
-
-
 class PathPlanner():
     """
     This class should contain all path planning functionality.
@@ -176,6 +125,15 @@ class PathPlanner():
         """
         raiseNotDefined()
 
+
+    def populate_scene():
+        """
+        Not sure how this will be implemented yet, but will basically
+            use the PathPlanner planning scene functionality to add
+            the scene items needed for our test/demo
+        """
+
+
     def remove_object_from_scene(self, id):
         """
         removes object from the scene
@@ -199,6 +157,39 @@ class PathPlanner():
         id: object id
         """
         raiseNotDefined()
+
+    def iterate_ik(self, pose, state_list = None, xyz_bounds = None, rpy_bounds = None, iteration_limit = 10):
+        """
+        Iterates IK until a non-colliding solution is found, or it hits the iteration limit
+        ------
+        pose: see get_ik
+        state_list: list of length 6 lists, each of which is an initial condition to be tested.
+            After the list is exhausted, the system will use pseudorandom start conditions
+            until the iteration count runs out (hopefully it'll pick random states intelligently)
+        xyz_bounds: see get_ik
+        rpy_bounds: see get_ik
+        iteration_limit: max number of initial conditions the algorithm will try (including the list)
+            Default is 10.
+        ------
+        returns: joint states, a list of size 6 (or None for failure)
+        """
+        raiseNotDefined()
+
+
+    def grasp_plan(self, pregrasp, grasp):
+        """
+        Plans to a pregrasp pose, then plans to the grasp pose
+        Does not open/close fingers
+        This should be the main function used, and will use many of the other functions
+        It will (hopefully) select intelligent IK solutions
+        ------
+        pregrasp: An autolab rigid_transform? see plan_to_pose
+        grasp: same as above
+        ------
+        returns: either two plans concatenated or just executes it
+        """
+        raiseNotDefined()
+
 
 
 
@@ -240,6 +231,18 @@ def raiseNotDefined():
     # def open_grippers(self):
     #     """
     #     Plans and executes grippers opening
+    #     """
+
+    # class PlanningInterface():
+    # """
+    # This is the user-facing interface containing the functions
+    #     the user will primarily use.
+    # It will contain a PathPlanner class, which wraps MoveIt
+    # """
+
+    # def __init__(self):
+    #     """
+    #     Will probably do nothing except instantiate a PathPlanner
     #     """
 
 

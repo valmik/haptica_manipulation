@@ -18,11 +18,28 @@ rosrun haptica_manipulation path_planner.py
 
 
 # Issues:
+- Figure out the argv in the moveit_commander.roscpp_initialize(sys.argv)
+- Figure out how to unvisualize plans (and use the display publisher)
 - Update IK solver links to come from the move group rather than being manually entered
-- Make an IK-based planner
-    - collision checks on IK
-    - check multiple IK solutions
-    - intelligent initial conditions for kinematics
+
+- implemenent the following functions (in this order):
+    - collision_free()
+    - iterate_ik()
+        - collision checks on IK
+        - check multiple IK solutions
+        - intelligent initial conditions for kinematics
+    - visualize_plan() (test)
+    - visualize_state()
+    - plan_to_pose()
+        - add intelligence (iterate_ik)
+    - grasp_plan()
+    - add_box_to_scene()
+    - add_stl_to_scene()
+    - remove_object_from_scene()
+    - attach_object_to_robot()
+    - detach_object_from_robot()
+    - populate_scene()
+
 - Add a second move group for the gripper
 - Objects
     http://docs.ros.org/indigo/api/moveit_tutorials/html/doc/pr2_tutorials/planning/src/doc/move_group_interface_tutorial.html

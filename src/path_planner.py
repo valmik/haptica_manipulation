@@ -13,20 +13,33 @@ from std_msgs.msg import Header
 import sys
 import numpy as np
 
-class PathPlanner(object):
+
+
+class PathPlanner():
+    """
+    This class should contain all path planning functionality.
+    The goal is that no ROS should be needed to interface with this node
+    All ROS should be self-contained here
+    """
+
     def __init__(self):
         """
-        Path Planner Class.
-        References:
-        dynamicreplanning.weebly.com,
-        moveit python interface tutorial,
-        trac_ik python tutorial
-        jaco_manipulation
+        Shouldn't need inputs. Stores:
+            2 move groups: arm and hand - moveit commander interface
+            planning scene interface and publisher
+            robot commander
+            IK solver (using trac_ik)
+            FK solver (moveit service)
         """
+
         rospy.loginfo("To stop project CTRL + C")
         rospy.on_shutdown(self.shutdown)
 
         # Initialize moveit_commander
+        # I honestly don't think it actually uses the sys.argv argument,
+        # but I need to do a little more digging first. It parses the input
+        # for arguments containing "__name:=" which it passes to another initializer
+        # I need to dig further to see what the name parameter actually changes
         moveit_commander.roscpp_initialize(sys.argv)
 
         # Instatiate the move group
@@ -35,6 +48,8 @@ class PathPlanner(object):
         self.group.set_workspace([-3, -3, -3, 3, 3, 3])
 
         # This publishes trajectories to RVIZ for visualization
+        # Need to figure out how to get rid of the visualization as well
+        # Also how to use this to publish individual poses
         self.display_planned_path_publisher = rospy.Publisher('arm/display_planned_path', DisplayTrajectory, queue_size=10)
 
         # This publishes updates to the planning scene
@@ -57,16 +72,28 @@ class PathPlanner(object):
 
         rospy.sleep(2)        
 
+        # Rate is 10 Hz. Is this a good rate?
         rate = rospy.Rate(10)
 
+
     def shutdown(self):
+        """
+        Things to do when the node is shut down
+        (currently does nothing besides printing a message, 
+        should it do anything?)
+        """
         rospy.loginfo("Stopping project")
         rospy.sleep(1)
 
+
     def plan_to_config(self, end_state):
         """
-        Uses MoveIt to plan a path from the current state to end_state and returns it
-        end_state: list of 6 joint values
+        Plans to a configuration using MoveIt.
+        Does not deal with finger positions (these stay static)
+        -------
+        end_state: list of joint angles, discluding fingers (length 6)
+        -------
+        returns: moveit path object (array of JointStates or RobotStates I believe)
         """
 
         joint_state = JointState()
@@ -88,33 +115,24 @@ class PathPlanner(object):
 
         return plan
 
-    def execute_path(self, path, wait_bool = True):
+    def plan_to_pose(self, end_pose, seed = None):
         """
-        Executes a provided path.
-        Note that the current position must be the same as the path's initial position.
-        This is currently not checked.
+        Plans to a pose by using inverse kinematics.
+        -------
+        end_pose: rigid_transform object from autolab? (or should I write my own? Or allow different inputs?) 
+        seed: an optional input to the IK solver.
+            It's a configuration (len 6 array) from which the solver will start. (trac_ik uses an augmented newton's method)
+            If it's None, it'll use the current pose as the seed
+        -------
+        returns: moveit path object
         """
-
-        self.group.execute(path, wait=wait_bool)
-
-        # def collision_free_move_pose(self, end_pose):
-        #     """
-        #     Uses MoveIt to plan a path from the current state to end effector pose end_pose
-        #     end_pose: a PoseStamped object for the end effector
-        #     """
-
-        #     self.group.set_start_state_to_current_state()
-        #     self.group.set_joint_value_target(end_pose)
-
-        #     self.group.set_workspace([-3, -3, -3, 3, 3, 3])
-
-        #     plan = self.group.plan()
-
-        #     return plan
+        raiseNotDefined()
 
     def move_home(self):
         """
-        Uses MoveIt to plan a path from the current state to the home position
+        Plans from the current state to the home position
+        -------
+        returns: moveit path object
         """
 
         self.group.set_start_state_to_current_state()
@@ -126,44 +144,27 @@ class PathPlanner(object):
 
         return plan
 
-    def visualize_plan(self, plan):
+    def execute_path(self, path, wait_bool = True):
         """
-        Visualize the plan in RViz
-        """
-
-        display_trajectory = DisplayTrajectory()
-        display_trajectory.trajectory_start = plan.points[0]
-        display_trajectory.trajectory.extend(plan.points)
-        self.display_planned_path_publisher.publish(display_trajectory)
-
-    def make_pose(self, position, orientation, frame):
-        """
-        Creates a PoseStamped message based on provided position and orientation
-        position: list of size 3
-        orientation: list of size 4 (quaternion) (wxyz)
-        frame: string (the reference frame to which the pose is defined)
-        returns pose: a PoseStamped object
+        Executes an input path in the real world / gazebo / rviz
+        ------
+        path: a moveit path object
+        wait_bool: whether the node pauses until the robot reaches its destination
         """
 
-        pose = PoseStamped()
-        pose.header.frame_id = frame
-        pose.pose.position.x = position[0]
-        pose.pose.position.y = position[1]
-        pose.pose.position.z = position[2]
-        pose.pose.orientation.w = orientation[0]
-        pose.pose.orientation.x = orientation[1]
-        pose.pose.orientation.y = orientation[2]
-        pose.pose.orientation.z = orientation[3]
-        return pose
+        self.group.execute(path, wait=wait_bool)
 
-    def get_ik(self, pose, seed_state = None, xyz_bounds = None, rpy_bounds = None):
+    def get_ik(self, pose, seed = None, xyz_bounds = None, rpy_bounds = None):
         """
-        get_ik returns a joint configuration from an end effector pose by using the trac_ik solver
-        pose: PoseStamped object. The header.frame_id should be "root", or it won't work
-        seed_state: a list of size 6. Initial joint positions for the solver. Default is [0,0,0,0,0,0]
-        xyz_bounds: a list of size 3. xyz bounds of the end effector in meters. This allows an approximate ik solution. Default is None
+        Uses trac_ik to get a joint configuration from an input pose
+        Does not include collision checking
+        ------
+        pose: rigid transform from autolab? See plan_to_pose
+        seed: list of size 6. start value for the IK. See plan_to_pose. If None, will use current pose
+        xyz_bounds: list of size 3. xyz bounds of the end effector in meters. This allows an approximate ik solution. Default is None
         rpy_bounds: a list of size 3. roll pitch yaw bounds of the end effector in radians. This allows an approximate ik solution. Default is None 
-        returns state: a list of joint values
+        ------
+        returns: joint states, a list of size 6 (or None for failure)
         """
 
         if seed_state is None:
@@ -194,11 +195,13 @@ class PathPlanner(object):
 
     def get_fk(self, joints):
         """
-        Gets forward kinematics to the end effector
-        joints: size 6 list. Joint angles for desired pose
-        returns pose: StackedPose of the end effector in the 'root' frame
+        Uses the MoveIt service to get the end effector pose from joints
+        Note that this is the pose of the beginning of the hand, not the hand itself
+        ------
+        joints: a list of size 6. Joint states for the calculation
+        ------
+        returns: a rigid transform from autolab? See plan_to_pose
         """
-
         header = Header()
         header.frame_id = self.ik_solver.base_link
 
@@ -210,104 +213,127 @@ class PathPlanner(object):
 
         return self.fk_solver(header, links, robot_state).pose_stamped[0]
 
-def add_arbitrary_obstacle(size, id, pose, planning_scene_publisher, scene, robot, operation):
-    """
-    Adds an arbitrary rectangular prism obstacle to the planning scene.
-    This is currently only for the ground plane
-    size: numpy array of size 3 (x,y,z dimensions)
-    id: string (object id/name)
-    pose: PoseStamped objecct (objects pose with respect to world frame)
-    planning_scene_publisher: ros Publisher('/collision_object', CollisionObject)
-    scene: PlanningSceneInterface
-    robot: RobotCommander
-    operation: currently just use CollisionObject.ADD
-    """
+    def collision_free(self, joints):
+        """
+        Checks if the configuration collides with anything in the planning scene
+        ------
+        joints: a list of size 6. Configuration for the collision check
+        ------
+        returns: boolean True if it's ok, False if it collides
+        """
+        raiseNotDefined()        
 
-    co = CollisionObject()
-    co.operation = operation
-    co.id = id
-    co.header = pose.header
-    box = SolidPrimitive()
-    box.type = SolidPrimitive.BOX
-    box.dimensions = size
-    co.primitives = [box]
-    co.primitive_poses = [pose.pose]
-    planning_scene_publisher.publish(co)
+    def add_stl_to_scene(self, id, fileName, pose, scale):
+        """
+        Adds an STL object to the scene
+        ------
+        id: object id (string)
+        fileName: location of the STL file
+        pose: autolab rigid_transform?
+        scale: len 3 list defining scale in x,y,z
+        """
+        raiseNotDefined()
 
-def test_planning():
-    """
-    Move back and forth between two points
-    """
+    def add_box_to_scene(self, id, pose, size):
+        """
+        Adds a box to the scene
+        ------
+        id: object id (string)
+        pose: see above
+        size: len 3 list for xyz dimensions
+        """
+        raiseNotDefined()
 
-    joints1 = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
-    joints2 = [4.80, 2.92, 1.00, 4.20, 1.45, 1.32]
+    def populate_scene():
+        """
+        Not sure how this will be implemented yet, but will basically
+            use the PathPlanner planning scene functionality to add
+            the scene items needed for our test/demo
+        """
+
+    def remove_object_from_scene(self, id):
+        """
+        removes object from the scene
+        ------
+        id: object id
+        """
+        raiseNotDefined()
+
+    def attach_object_to_robot(self, id):
+        """
+        attaches object to the robot
+        ------
+        id: object id
+        """
+        raiseNotDefined()
+
+    def detach_object_from_robot(self, id):
+        """
+        detaches object from robot
+        ------
+        id: object id
+        """
+        raiseNotDefined()
+
+    def visualize_plan(self, plan): # Untested
+        """
+        Visualize the plan in RViz
+        """
+
+        display_trajectory = DisplayTrajectory()
+        display_trajectory.trajectory_start = plan.points[0]
+        display_trajectory.trajectory.extend(plan.points)
+        self.display_planned_path_publisher.publish(display_trajectory)
+
+    def visualize_state(self, joint_state):
+        """
+        Visualize a joint state in RViz
+        """
+
+        raiseNotDefined()
+
+    def iterate_ik(self, pose, state_list = None, xyz_bounds = None, rpy_bounds = None, iteration_limit = 10):
+        """
+        Iterates IK until a non-colliding solution is found, or it hits the iteration limit
+        ------
+        pose: see get_ik
+        state_list: list of length 6 lists, each of which is an initial condition to be tested.
+            After the list is exhausted, the system will use pseudorandom start conditions
+            until the iteration count runs out (hopefully it'll pick random states intelligently)
+        xyz_bounds: see get_ik
+        rpy_bounds: see get_ik
+        iteration_limit: max number of initial conditions the algorithm will try (including the list)
+            Default is 10.
+        ------
+        returns: joint states, a list of size 6 (or None for failure)
+        """
+        raiseNotDefined()
 
 
-    path_planner = PathPlanner()
+    def grasp_plan(self, pregrasp, grasp):
+        """
+        Plans to a pregrasp pose, then plans to the grasp pose
+        Does not open/close fingers
+        This should be the main function used, and will use many of the other functions
+        It will (hopefully) select intelligent IK solutions
+        ------
+        pregrasp: An autolab rigid_transform? see plan_to_pose
+        grasp: same as above
+        ------
+        returns: either two plans concatenated or just executes it
+        """
+        raiseNotDefined()
 
-    raw_input("Press Enter to move to home")
-    plan = path_planner.move_home()
-    path_planner.execute_path(plan)
-    rospy.sleep(0.5)
 
-    while True:
-        raw_input("Press Enter to move to position 1")
-        plan = path_planner.plan_to_config(joints1)
-        path_planner.execute_path(plan)
-        rospy.sleep(0.5)
 
-        raw_input("Press Enter to move to position 2")
-        plan = path_planner.plan_to_config(joints2)
-        path_planner.execute_path(plan)
-        rospy.sleep(0.5)
 
-def test_ik():
-    """
-    Tests the IK solver
-    """
+def raiseNotDefined():
+    fileName = inspect.stack()[1][1]
+    line = inspect.stack()[1][2]
+    method = inspect.stack()[1][3]
 
-    path_planner = PathPlanner()
-
-    raw_input("Press Enter to move to home")
-    plan = path_planner.move_home()
-    path_planner.execute_path(plan)
-    rospy.sleep(0.5)
-
-    joints_old = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
-    pose = path_planner.get_fk(joints_old)
-
-    raw_input("Press Enter to run inverse kinematics")
-    joints = path_planner.get_ik(pose)
-
-    print 'input:' + str(joints_old)
-    print 'solution:' + str(joints)
-
-    raw_input("Press Enter to move to position")
-    plan = path_planner.plan_to_config(joints)
-    path_planner.execute_path(plan)
-    rospy.sleep(0.5)
-
-def test_fk():
-    """
-    Tests that you can get a pose from a known valid configuration
-    """
-
-    joints = [0.0, 2.9, 1.3, 4.2, 1.4, 0.0]
-
-    path_planner = PathPlanner()
-
-    pose = path_planner.get_fk(joints)
-
-    print pose
-
-if __name__ == '__main__':
-    rospy.init_node('kinova_controller')
-
-    # if len(sys.argv) > 1:
-    #     filename = sys.argv[1]
-
-    test_ik()
-
+    print "*** Method not implemented: %s at line %s of %s" % (method, line, fileName)
+    sys.exit(1)
 
 
 

@@ -1,0 +1,8 @@
+<launch>
+    <!-- send Kinova urdf to parameter server -->
+    <!-- note that the kinova launch file already does this, so just run that first -->
+
+    <node name="collision_srv" pkg="haptica_manipulation" type="collision_srv" respawn="false" output="screen">
+    </node>
+
+</launch>
